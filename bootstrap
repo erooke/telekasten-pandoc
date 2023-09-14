@@ -1,0 +1,37 @@
+#!/bin/sh
+
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+base=${config}/telekasten
+
+echo "$base"
+
+confirm() {
+	while :
+	do
+		read -p "$1 (y/n)? " choice
+		case "$choice" in
+			y|Y ) return 0;;
+			n|N ) return 1;;
+			*) echo "Invalid choice" 1>&2;;
+		esac
+	done
+}
+
+confirm "install scripts to ${base}/scripts" && {
+	mkdir -p "$base"
+	cp -rt "$base" scripts
+}
+
+confirm "install css to ${base}/static" && {
+	mkdir -p "$base"
+	cp -rt "$base" scripts
+}
+
+sysd="${config}/systemd/user"
+file="teleksaten-pandoc.service"
+confirm "install ${file} to ${sysd}" && {
+	mkdir -p "$sysd"
+	cp systemd/$file ${sysd}/file
+}
+
+exit 0

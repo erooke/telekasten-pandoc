@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# The formatting script, it should take the filename to format as its only
+# argument and dump a formatted output on stdout
+
+file="$1"
+shift
+name=$(basename -- "$file")
+author="Ethan Rooke"
+name="${name%.md}"
+
+pandoc "$@" \
+	--metadata author="$author" \
+	--standalone \
+	--from markdown+wikilinks_title_after_pipe \
+	--to html \
+	--css style.css \
+	--katex \
+	"$file"

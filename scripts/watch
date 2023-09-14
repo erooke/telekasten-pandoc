@@ -1,0 +1,9 @@
+#! /bin/sh
+
+inotifywait "$HOME/notes"\
+	--monitor \
+	--recursive \
+	--event create \
+	--event moved_to \
+	--include ".*\.md$" \
+	--format %w%f

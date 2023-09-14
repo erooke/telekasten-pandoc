@@ -1,0 +1,11 @@
+LOCATION ::= ${PREFIX}/bin
+
+.PHONY: install
+install: telekasten-pandoc
+	mkdir -p ${LOCATION}
+	install -t ${LOCATION} $<
+
+.PHONY: check
+check:
+	find scripts -type f -exec shellcheck {} +
+	shellcheck telekasten-pandoc

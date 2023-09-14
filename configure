@@ -1,0 +1,22 @@
+#!/bin/sh
+
+while [ "$#"  -ne 0 ]
+do
+	case "$1" in
+		--prefix=*)
+			PREFIX=${1#--prefix=}
+			shift
+		;;
+		*)
+			echo "Unknown argument $1" 1>&2
+			echo "configure only supports --prefix=dir" 1>&2
+			exit 1
+		;;
+	esac
+done
+
+PREFIX=${PREFIX:-/usr/local}
+{
+	printf "PREFIX ::= %s\n\n" $PREFIX
+	cat Makefile.in
+} > Makefile

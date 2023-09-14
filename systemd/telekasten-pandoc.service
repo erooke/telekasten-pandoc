@@ -1,0 +1,9 @@
+[Unit]
+Description=Render and serve telekasten notes
+
+[Service]
+Type=forking
+ExecStart=/usr/local/telekasten-pandoc
+
+[Install]
+WantedBy=multi-user.target

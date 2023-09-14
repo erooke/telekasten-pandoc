@@ -1,0 +1,6 @@
+#! /bin/sh
+# The finder script, should just print out every file its expecting to end up
+# in the output
+BASE="$HOME/notes"
+
+find "$BASE" -name "*.md" -type f -not -path "$BASE/templates/*" -not -path "$BASE/daily/*"

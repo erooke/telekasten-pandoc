@@ -1,0 +1,5 @@
+Makefile
+result
+out
+.direnv
+.envrc

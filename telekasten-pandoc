@@ -1,0 +1,49 @@
+#! /bin/sh
+config_home=${XDG_CONFIG_HOME:-$home/.config}
+data_home=${XDG_DATA_HOME:-$home/.local/state}
+
+config=${config_home}/telekasten
+
+scripts=${config}/scripts
+
+# Needed scripts
+needed() {
+	[ -x "$1" ] || {
+		echo 1>&2 "$1 either doesn't exist or is not executable"
+		exit 1
+	}
+}
+finder=${scripts}/finder
+needed $finder
+export format=${scripts}/format
+needed $format
+index=${scripts}/index
+needed $index
+host=${scripts}/host
+needed $host
+watch=${scripts}/watch
+needed $watch
+
+
+
+out=${data_home}/telekasten
+
+rm -rf "$out"
+mkdir "$out"
+
+cp -r "$config/static/"* "$out"/
+
+pipe=$(mktemp -u)
+mkfifo "$pipe"
+trap 'rm "$pipe"' EXIT
+
+{
+	"$index" < "$pipe" > "$out"/index.html &
+	# Parallel replacements:
+	# {}: dir/subdir/file.ext
+	# {/.}: file
+	"$finder" | tee "$pipe" | parallel "${format} {} > ${out}/{/.}.html"
+}
+
+"$host" "$out" &
+"$watch" | parallel "${format} {} > ${out}/{/.}.html" &
