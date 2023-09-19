@@ -1,49 +1,41 @@
 #! /bin/sh
 config_home=${XDG_CONFIG_HOME:-$home/.config}
-data_home=${XDG_DATA_HOME:-$home/.local/state}
-
 config=${config_home}/telekasten
+export TELEKASTEN_SCRIPTS=${config}/scripts
+. ${TELEKASTEN_SCRIPTS}/vars
 
-scripts=${config}/scripts
-
-# Needed scripts
+# Load the needed scripts
 needed() {
 	[ -x "$1" ] || {
 		echo 1>&2 "$1 either doesn't exist or is not executable"
 		exit 1
 	}
 }
-finder=${scripts}/finder
+finder=${TELEKASTEN_SCRIPTS}/finder
 needed $finder
-export format=${scripts}/format
+format=${TELEKASTEN_SCRIPTS}/format
 needed $format
-index=${scripts}/index
+index=${TELEKASTEN_SCRIPTS}/index
 needed $index
-host=${scripts}/host
+host=${TELEKASTEN_SCRIPTS}/host
 needed $host
-watch=${scripts}/watch
+watch=${TELEKASTEN_SCRIPTS}/watch
 needed $watch
 
+# Initialize the output directory
+rm -rf "$TELEKASTEN_OUT"
+mkdir -p "$TELEKASTEN_OUT"
+cp -r "$config/static/"* "$TELEKASTEN_OUT"/
+
+# Parallel replacements:
+# {}: dir/subdir/file.ext
+# {.}: dir/subdir/file
+"$finder" | \
+	parallel \
+		"mkdir -p ${TELEKASTEN_OUT}/{//} && \
+		${format} ${TELEKASTEN_ROOT}/{} > ${TELEKASTEN_OUT}/{.}.html"
 
 
-out=${data_home}/telekasten
-
-rm -rf "$out"
-mkdir "$out"
-
-cp -r "$config/static/"* "$out"/
-
-pipe=$(mktemp -u)
-mkfifo "$pipe"
-trap 'rm "$pipe"' EXIT
-
-{
-	"$index" < "$pipe" > "$out"/index.html &
-	# Parallel replacements:
-	# {}: dir/subdir/file.ext
-	# {/.}: file
-	"$finder" | tee "$pipe" | parallel "${format} {} > ${out}/{/.}.html"
-}
-
-"$host" "$out" &
-"$watch" | parallel "${format} {} > ${out}/{/.}.html" &
+"$index"
+"$host" &
+"$watch" | parallel "${format} ${TELEKASTEN_ROOT}/{} > ${TELEKASTEN_OUT}/{.}.html" &

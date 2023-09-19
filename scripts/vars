@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Export variables. These will be available to all scripts
+data_home=${XDG_DATA_HOME:-$home/.local/state}
+
+# The base directory for telekasten
+export TELEKASTEN_ROOT="${HOME}/notes"
+
+# The output directory to put the files in
+export TELEKASTEN_OUT="${data_home}/telekasten"

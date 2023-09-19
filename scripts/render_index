@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Render an index page at $1
+
+format=${TELEKASTEN_SCRIPTS}/format
+
+cd "$1" || exit 1
+find . \
+	-maxdepth 1 \
+	-not -name "." \
+	-not -name ".."  \
+	-not -name "index.html" \
+	-not -name "*.css" | \
+cut -b3- | \
+sort |
+sed 's/\.html$//;s/^/- [[/;s/$/]]/' |
+"$format" \
+	"/proc/self/fd/0" \
+	--metadata title="Index" > index.html

@@ -2,4 +2,4 @@
 
 httplz \
 	--strip-extensions \
-	"$1"
+	"$TELEKASTEN_OUT"

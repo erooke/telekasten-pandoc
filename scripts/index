@@ -1,11 +1,5 @@
 #! /bin/sh
-#
-# Index builder, takes a stream of files and builds an index file
-while read -r line; do
-	basename "$line"
-done | \
-sort | \
-sed 's/\.md$//;s/^/- [[/;s/$/]]/' | \
-"$format" \
-	"/proc/self/fd/0" \
-	--metadata title="Index"
+render=${TELEKASTEN_SCRIPTS}/render_index
+
+find "$TELEKASTEN_OUT" -type d -not -name "." -not -name ".." | \
+	parallel "${render}"

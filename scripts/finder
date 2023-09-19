@@ -1,6 +1,12 @@
 #! /bin/sh
 # The finder script, should just print out every file its expecting to end up
 # in the output
-BASE="$HOME/notes"
 
-find "$BASE" -name "*.md" -type f -not -path "$BASE/templates/*" -not -path "$BASE/daily/*"
+# This will cause find to print out the path's relative to the root
+cd "$TELEKASTEN_ROOT" || exit 1
+find "." \
+	-name "*.md" \
+	-type f \
+	-not -path "./templates/*" \
+	-not -path "./daily/*" |
+	cut -b3-

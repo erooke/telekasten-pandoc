@@ -1,9 +1,13 @@
 #! /bin/sh
 
-inotifywait "$HOME/notes"\
+inotifywait "${TELEKASTEN_ROOT}"\
 	--monitor \
 	--recursive \
 	--event create \
 	--event moved_to \
 	--include ".*\.md$" \
-	--format %w%f
+	--format %w%f | \
+while read -r line
+do
+	realpath --relative-to "${TELEKASTEN_ROOT}" "$line"
+done
