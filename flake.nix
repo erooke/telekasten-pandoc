@@ -11,36 +11,23 @@
   }: let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
-    deps = with pkgs; [
-      httplz
-      inotify-tools
-      pandoc
-      parallel
-    ];
-    src = builtins.readFile ./telekasten-pandoc;
-    script = (pkgs.writeScriptBin "telekasten-pandoc" src).overrideAttrs (old: {
-      buildCommand = "${old.buildCommand}\n patchShebangs $out";
-    });
+    telekasten-pandoc = pkgs.callPackage ./nix/telekasten-pandoc.nix {};
   in {
     formatter.${system} = pkgs.alejandra;
 
     packages.${system} = {
-      default = self.packages.${system}.telekasten-pandoc;
+      default = telekasten-pandoc;
+      telekasten-pandoc = telekasten-pandoc;
+    };
 
-      telekasten-pandoc = pkgs.symlinkJoin {
-        name = "telekasten-pandoc";
-        paths = [script] ++ deps;
-        buildInputs = [pkgs.makeWrapper];
-        postBuild = "wrapProgram $out/bin/telekasten-pandoc --prefix PATH : $out/bin";
-      };
+    overlays.default = final: prev: {
+      telekasten-pandoc = prev.callPackage ./nix/telekasten-pandoc.nix {};
     };
 
     devShells.${system}.default = pkgs.mkShell {
-      buildInputs =
-        [
-          pkgs.shellcheck
-        ]
-        ++ deps;
+      buildInputs = [
+        pkgs.shellcheck
+      ];
     };
   };
 }
